@@ -11,13 +11,25 @@ output:
 This is the report for first assignment of the Coursera Course on [Reproducible Research](https://www.coursera.org/course/repdata). It deals with the data of activity monitoring devices. The data contains step-counts of 5 minute intervals through out the day. 
 
 ## Loading and preprocessing of data
-```{r}
+
+```r
 # load ggplot for diagram plotting 
 library(ggplot2)
 
 # load data
 dataRaw <- read.csv("activity.csv", header = TRUE)
+```
 
+```
+## Warning in file(file, "rt"): kann Datei 'activity.csv' nicht öffnen: No
+## such file or directory
+```
+
+```
+## Error in file(file, "rt"): kann Verbindung nicht öffnen
+```
+
+```r
 # extract all non-NA data. 
 data<-dataRaw[!is.na(dataRaw$steps),]
 ```
@@ -29,7 +41,8 @@ The data for this assignment consists of the variables:
 - Interval: Identifier for the 5-minute interval in which measurement was taken
 
 ## Mean of total number of steps per day
-```{r}
+
+```r
 # aggregation of steps for each day
 dataClustSteps<-(aggregate(data$steps,by=list(data$date),sum))
 # rename the collumns
@@ -41,16 +54,31 @@ p <- p + geom_histogram( aes( x = steps , fill = ..count..), binwidth = 2500  )
 p <- p + ggtitle("Histogram of Steps per Day") 
 p <- p + labs(x = "Steps per Day", y = "Number of Days" )
 p
+```
 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+
+```r
 # calculation of median of steps over all days 
 mean(dataClustSteps$steps)
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 # calculation of the median of steps over all days 
 median(dataClustSteps$steps)
 ```
 
+```
+## [1] 10765
+```
+
 ## Average daily Activity Pattern
-```{r}
+
+```r
 # aggregate the step counts over the 5-minute intervalls 
 dataClustInterval<-aggregate(data$steps,by=list(data$interval),mean)
 # rename the collumns
@@ -60,16 +88,31 @@ names(dataClustInterval)<-c("interval","steps")
 p2 <- ggplot(data = dataClustInterval, aes(x = interval, y = steps ))+ geom_line(weight=5)
 p2 <- p2 + ggtitle("Average daily Activity Pattern") + labs(x = "5min Interval", y = "Number of Steps" )
 p2
+```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+```r
 # interval with maximum number of steps (on average)
 dataClustInterval[ dataClustInterval$steps == max(dataClustInterval$steps),"interval"]
 ```
 
+```
+## [1] 835
+```
+
 ## Missing values
-```{r}
+
+```r
 # Total number of missing values (observations) in the dataset
 nrow(dataRaw) - nrow(data)
+```
 
+```
+## [1] 2304
+```
+
+```r
 # Strategy for filling in missing values
 # mean (rounded) for the respective 5-minute interval is utilized to fill in the missing values 
 fillValues <- function(dataLocal,dataClustInt) {
@@ -92,22 +135,49 @@ names(dataClustStepsNew) <- c( "day", "steps")
 p3 <- ggplot( data = dataClustStepsNew ) + geom_histogram( aes( x = steps , fill = ..count..), binwidth = 2500  )
 p3 <- p3 + ggtitle("Histogram: Steps per Day")
 p3
+```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
+```r
 # calculation of median of steps over all days - new data set
 mean(dataClustStepsNew$steps)
- 
+```
+
+```
+## [1] 10749.77
+```
+
+```r
 # mean-difference of data set with and without substituted vales
 mean(dataClustStepsNew$steps) - mean(dataClustSteps$steps)
+```
 
+```
+## [1] -16.41819
+```
+
+```r
 # calculation of the median of steps over all days - new data set
 median(dataClustStepsNew$steps)
+```
 
+```
+## [1] 10641
+```
+
+```r
 # median-difference of data set with and without substituted vales
 median(dataClustStepsNew$steps) - median(dataClustSteps$steps)
 ```
 
+```
+## [1] -124
+```
+
 ### Activity patterns of weekdays and weekends
-```{r}
+
+```r
 # new factor: weekday {"weekend" for days, which are Satturday or Sunday, rest is "weekday"}
 dataNew$day <- weekdays(as.POSIXlt.date(format(dataNew$date, format="%Y %m %d")), abbreviate = TRUE)
 
@@ -135,3 +205,5 @@ p <- ggplot(data = dataNewClustInterval, aes(x = interval, y = steps ) ) + geom_
 p <- p + ggtitle("Average daily Activity Pattern") + facet_grid(day ~ .)
 p
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
